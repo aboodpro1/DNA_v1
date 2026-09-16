@@ -2,18 +2,23 @@
 
 This document contains commands for running, testing, and verifying the application locally.
 
-## Local Server Execution
-
-### Python HTTP Server
-Run the local HTTP server on port 8080:
+### Node.js Production Server with Zero-CORS Webhook Proxy
+Run the local Node.js server on port 8080 (also runs on Railway):
 ```bash
-python -m http.server 8080
+node server.js
 ```
 
 Access the application routes:
 - Sign In: `http://localhost:8080/index.html`
 - Sign Up: `http://localhost:8080/signup.html`
 - Dashboard: `http://localhost:8080/dashboard.html`
+- Proxy Endpoint: `http://localhost:8080/api/webhook`
+
+### Python HTTP Server
+Run the local HTTP server on port 8080:
+```bash
+python -m http.server 8080
+```
 
 ## n8n Authorization Webhook Testing
 
