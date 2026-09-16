@@ -93,43 +93,25 @@ async function handleSignIn(e) {
   setLoading(true);
 
   try {
-    const isGet = (API_CONFIG.method || 'GET').toUpperCase() === 'GET';
-    const endpoint = (API_CONFIG.auth && API_CONFIG.auth.signIn) ? API_CONFIG.auth.signIn : API_CONFIG.signIn;
-    let fetchUrl = endpoint;
-    let fetchOptions = {};
+    const endpoint = (API_CONFIG && API_CONFIG.defaultUrl)
+      ? API_CONFIG.defaultUrl
+      : ((API_CONFIG && API_CONFIG.auth && API_CONFIG.auth.signIn) ? API_CONFIG.auth.signIn : 'https://aboodjallab.app.n8n.cloud/webhook-test/sign_both');
 
-    if (isGet) {
-      // Append credentials and metadata as query parameters for GET requests
-      const urlObj = new URL(fetchUrl);
-      urlObj.searchParams.set('action', 'signin');
-      urlObj.searchParams.set('email', email);
-      urlObj.searchParams.set('password', password);
-      urlObj.searchParams.set('timestamp', new Date().toISOString());
-      fetchUrl = urlObj.toString();
-      fetchOptions = {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json, text/plain, */*'
-        }
-      };
-    } else {
-      // Use JSON payload body for POST requests
-      fetchOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json, text/plain, */*'
-        },
-        body: JSON.stringify({
-          action: 'signin',
-          email: email,
-          password: password,
-          timestamp: new Date().toISOString()
-        })
-      };
-    }
+    const fetchOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/plain, */*'
+      },
+      body: JSON.stringify({
+        action: 'signin',
+        email: email,
+        password: password,
+        timestamp: new Date().toISOString()
+      })
+    };
 
-    const response = await fetch(fetchUrl, fetchOptions);
+    const response = await fetch(endpoint, fetchOptions);
 
     let data;
     const contentType = response.headers.get('content-type');
