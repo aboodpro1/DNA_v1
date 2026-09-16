@@ -1,0 +1,21 @@
+{
+  "name": "dna-v1",
+  "version": "1.0.0",
+  "description": "AI Studio Brand DNA & Content Matrix Management Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "ai-studio",
+    "brand-dna",
+    "notion",
+    "n8n"
+  ],
+  "author": "Ahmad Jallab <ajjallab@gmail.com>",
+  "license": "MIT"
+}
