@@ -89,10 +89,10 @@ const server = http.createServer((req, res) => {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-    // Cache control policy
-    let cacheControl = 'public, max-age=3600'; // 1 hour for assets
-    if (ext === '.html') {
-      cacheControl = 'no-cache, no-store, must-revalidate'; // Always fresh HTML
+    // Cache control policy: disable caching on code files so updates apply immediately
+    let cacheControl = 'no-cache, no-store, must-revalidate';
+    if (ext === '.png' || ext === '.jpg' || ext === '.jpeg' || ext === '.svg' || ext === '.woff2') {
+      cacheControl = 'public, max-age=86400'; // 1 day for static images/fonts
     }
 
     const headers = {
