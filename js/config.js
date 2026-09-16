@@ -11,8 +11,21 @@
 
 // Retrieve any custom or saved webhook endpoint from storage, defaulting to n8n cloud test webhook
 const N8N_CLOUD_URL = "https://aboodjallab.app.n8n.cloud/webhook-test/sign_both";
-const savedWebhookUrl = typeof localStorage !== 'undefined' ? localStorage.getItem('custom_webhook_url') : null;
-const DEFAULT_WEBHOOK_URL = savedWebhookUrl || N8N_CLOUD_URL;
+
+let initialWebhook = N8N_CLOUD_URL;
+if (typeof localStorage !== 'undefined') {
+  const saved = localStorage.getItem('custom_webhook_url');
+  if (saved) {
+    const isSavedLocal = saved.includes('localhost') || saved.includes('127.0.0.1');
+    const isCurrentHostLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (!isSavedLocal || isCurrentHostLocal) {
+      initialWebhook = saved;
+    } else {
+      localStorage.removeItem('custom_webhook_url');
+    }
+  }
+}
+const DEFAULT_WEBHOOK_URL = initialWebhook;
 
 const API_CONFIG = {
   method: "POST",
