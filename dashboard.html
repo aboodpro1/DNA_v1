@@ -1,0 +1,491 @@
+<!--
+  AI Studio - Scalable Dashboard
+  High-craft UI & UX for Brand DNA Ingestion, User Identity, and Automation Telemetry.
+
+  Route:    /dashboard.html
+  Trigger:  Authenticated workspace
+  Auth:     SSO & n8n Webhook validation
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Studio &bull; Dashboard</title>
+  <meta name="description" content="AI Content Studio - Intelligent Brand DNA Ingestion & Automation Platform">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div id="dashboardShell" class="dashboard-shell">
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="dashboard-sidebar">
+
+      <!-- Workspace Switcher Header -->
+      <div class="sidebar-header">
+        <div class="workspace-card">
+          <div class="workspace-avatar">
+            <span class="workspace-initial">AI</span>
+            <span class="status-indicator-dot" title="Connected to n8n & Notion"></span>
+          </div>
+          <div class="workspace-meta">
+            <h2 class="workspace-title">AI Studio</h2>
+            <span class="workspace-tier">Workspace &bull; Pro</span>
+          </div>
+        </div>
+        <button type="button" id="btnToggleSidebar" class="btn-sidebar-collapse" aria-label="Toggle Sidebar"
+          title="Collapse / Expand Sidebar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="11 17 6 12 11 7"></polyline>
+            <polyline points="18 17 13 12 18 7"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Primary Action CTA -->
+      <div class="sidebar-cta-wrap">
+        <button type="button" id="btnAddDnaSidebar" class="btn-add-dna">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span class="cta-label"> Add DNA</span>
+        </button>
+      </div>
+
+      <!-- Scalable Navigation Hierarchy -->
+      <nav class="sidebar-nav" aria-label="Dashboard Menu">
+
+        <!-- Section 1: Brand Intelligence -->
+        <div class="nav-group">
+          <span class="nav-section-title">Brand Intelligence</span>
+          <a href="#your-dna" id="navYourDna" class="nav-item active">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+            <span class="nav-label">structure DNA</span>
+            <span class="nav-pill pill-active">5 Pillars</span>
+          </a>
+          <a href="#add-dna" id="navAddDna" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span class="nav-label">Upload DNA.md</span>
+          </a>
+          <a href="#dna-builder" class="nav-item nav-item-disabled" title="Coming in Phase 6">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span class="nav-label">DNA Questionnaire</span>
+            <span class="nav-pill pill-upcoming">Phase 6</span>
+          </a>
+        </div>
+
+        <!-- Section 2: Content Studio -->
+        <div class="nav-group">
+          <span class="nav-section-title">Content Studio</span>
+          <a href="#matrix" class="nav-item nav-item-disabled" title="Coming in Phase 7">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
+            <span class="nav-label">Content Matrix</span>
+            <span class="nav-pill pill-upcoming">Phase 7</span>
+          </a>
+          <a href="#gallery" class="nav-item nav-item-disabled" title="Image Generation Pipeline">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span class="nav-label">Asset Gallery</span>
+          </a>
+        </div>
+
+        <!-- Section 3: System & Settings -->
+        <div class="nav-group">
+          <span class="nav-section-title">System</span>
+          <a href="#settings" id="navSettings" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg>
+            <span class="nav-label">Settings &amp; Webhooks</span>
+          </a>
+        </div>
+
+      </nav>
+
+      <!-- User Profile & Sign Out Footer -->
+      <div class="sidebar-footer">
+        <div class="user-profile-card">
+          <div id="userAvatar" class="user-avatar" title="Account Initial">U</div>
+          <div class="user-details">
+            <div class="user-details-header">
+              <span class="user-account-title">Account</span>
+              <span id="userStatusPill" class="user-status-pill">Pending</span>
+            </div>
+            <span id="userEmailDisplay" class="user-email">user@domain.com</span>
+            <span id="userIdBadge" class="user-id-subtext"></span>
+          </div>
+        </div>
+        <button type="button" id="btnSignOut" class="btn-signout" title="Sign out of workspace">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span class="signout-label">Sign Out</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+
+      <!-- Top Dashboard Header Bar -->
+      <header class="dashboard-topbar">
+        <div class="topbar-breadcrumb">
+          <span class="crumb-root">AI Studio</span>
+          <span class="crumb-separator">/</span>
+          <span id="crumbCurrentView" class="crumb-current">Your DNA</span>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="backend-telemetry-badge">
+            <span class="pulse-dot"></span>
+            <span class="telemetry-label">Live </span>
+          </div>
+          <button type="button" class="btn-quick-action" onclick="switchView('add-dna')" title="Quick Upload DNA">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Upload DNA</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- View 1: Your DNA -->
+      <section id="viewYourDna" class="view-section">
+        <div class="view-header">
+          <div class="view-title-wrap">
+            <h1 class="view-title">Your DNA</h1>
+            <span class="view-badge">Active Engine</span>
+          </div>
+          <p class="view-subtitle">Brand intelligence, strategy rules, and content matrix foundation</p>
+        </div>
+
+        <!-- Dashboard Notification Box -->
+        <div id="dashboardNotificationBox" class="alert-box" role="alert" aria-live="polite"></div>
+
+        <!-- Operational Metrics & Telemetry Grid -->
+        <div class="metrics-grid" id="dashboardMetricsGrid">
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Brand Document</span>
+              <span id="metricDnaDot" class="metric-status-dot dot-standby"></span>
+            </div>
+            <div class="metric-value-wrap">
+              <span class="metric-value" id="kpiDnaFile">Standby</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-subtext" id="kpiDnaSubtext">Awaiting DNA.md</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Pillars Calibrated</span>
+              <span class="metric-tag tag-emerald" id="kpiPillarsTag">0 / 5</span>
+            </div>
+            <div class="metric-value-wrap">
+              <span class="metric-value" id="kpiPillarsValue">0%</span>
+              <span class="metric-unit">ready</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-subtext" id="kpiPillarsSubtext">5 Engine Vectors</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Content Matrix</span>
+              <span class="metric-tag tag-cyan">5x5 Grid</span>
+            </div>
+            <div class="metric-value-wrap">
+              <span class="metric-value">25</span>
+              <span class="metric-unit">angles</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-subtext">Carousel Formulas</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Telemetry Pipeline</span>
+              <span class="metric-tag tag-purple"> Live</span>
+            </div>
+            <div class="metric-value-wrap">
+              <span class="metric-value" id="kpiPipelineStatus">Active</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-subtext">Notion Bi-directional Sync</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="dnaCardContainer">
+          <!-- Populated dynamically by dashboard.js -->
+        </div>
+      </section>
+
+      <!-- View 2: Add DNA (Drag & Drop Interface) -->
+      <section id="viewAddDna" class="view-section" style="display: none;">
+        <div class="view-header">
+          <div class="view-title-wrap">
+            <h1 class="view-title">Add Your DNA</h1>
+            <span class="view-badge">Ingestion</span>
+          </div>
+          <p class="view-subtitle">Select or drag &amp; drop your DNA.md file to calibrate your AI content engine</p>
+        </div>
+
+        <!-- Detected DNA Foundation Card (Rendered only when active DNA foundation exists) -->
+        <div id="existingDnaFoundationContainer" class="existing-foundation-container" style="display: none;"></div>
+
+        <!-- Drag & Drop Dropzone -->
+        <div id="dropzone" class="dropzone" role="region" aria-label="DNA File Upload">
+          <input type="file" id="dnaFileInput" accept=".md" style="display: none;">
+          <div class="dropzone-glow-ambient" aria-hidden="true"></div>
+          <div class="dropzone-inner-content">
+            <div class="dropzone-icon-box">
+              <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <div class="dropzone-title">Drag &amp; Drop DNA.md here</div>
+            <div class="dropzone-subtitle">Supported format: Markdown (.md) &bull; Automatically sent to n8n</div>
+            <span class="dropzone-btn">Browse Local File</span>
+          </div>
+        </div>
+
+        <!-- Selected File Information & Preview Card -->
+        <div id="selectedFileCard" class="selected-file-card">
+          <div class="file-header">
+            <div class="file-name">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span id="selectedFileName">DNA.md</span>
+            </div>
+            <span id="selectedFileSizeBadge" class="file-badge">0 KB</span>
+          </div>
+
+          <div id="selectedFilePreview" class="file-preview">// File content preview...</div>
+
+          <div style="margin-top: 1.25rem;">
+            <button type="button" id="btnUploadDna" class="btn-primary">
+              <span class="spinner" aria-hidden="true"></span>
+              <span id="btnUploadText">Upload DNA to n8n</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feedback Alert State -->
+        <div id="dnaAlertBox" class="alert-box" role="alert" aria-live="polite"></div>
+
+      </section>
+
+      <!-- View 3: Settings & Integrations -->
+      <section id="viewSettings" class="view-section" style="display: none;">
+        <div class="view-header">
+          <div class="view-title-wrap">
+            <h1 class="view-title">Settings &amp; Integration</h1>
+            <span class="view-badge">System</span>
+          </div>
+          <p class="view-subtitle">Manage user profile, Notion sync credentials, and real or test automation webhooks
+          </p>
+        </div>
+
+        <div class="settings-grid">
+
+          <!-- Card 1: User Identity & Profile Management -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <div class="settings-card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div>
+                <h3 class="settings-card-title">User Profile &amp; Credentials</h3>
+                <p class="settings-card-desc">Update your display name, password, and manage your Notion account entity.
+                </p>
+              </div>
+            </div>
+
+            <form id="formProfileSettings" novalidate>
+              <div class="settings-field-group">
+                <label class="settings-field-label">Authenticated Email (SSO Identity)</label>
+                <div id="settingsEmailField" class="settings-field-value font-mono">Loading...</div>
+              </div>
+
+              <div class="settings-field-group">
+                <label class="settings-field-label">Internal Notion User ID</label>
+                <div id="settingsUserIdField" class="settings-field-value font-mono">Loading...</div>
+              </div>
+
+              <div class="settings-field-group">
+                <label for="inputSettingsName" class="settings-field-label">Full Name / Display Name</label>
+                <input type="text" id="inputSettingsName" class="form-input" placeholder="Enter your full name"
+                  autocomplete="name">
+              </div>
+
+              <div class="settings-field-group">
+                <label for="inputSettingsPassword" class="settings-field-label">New Password</label>
+                <div class="settings-input-wrap">
+                  <input type="password" id="inputSettingsPassword" class="form-input font-mono"
+                    placeholder="Enter new password (min. 8 characters)" autocomplete="new-password">
+                  <button type="button" id="btnTogglePasswordVisibility" class="btn-input-toggle"
+                    aria-label="Toggle password visibility">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="settings-btn-row">
+                <button type="submit" id="btnSaveProfileSettings" class="btn-primary">
+                  <span class="spinner" aria-hidden="true"></span>
+                  <span id="btnSaveProfileText">Save Profile Changes</span>
+                </button>
+              </div>
+
+              <div id="profileAlertBox" class="alert-box" role="alert" aria-live="polite"></div>
+            </form>
+          </div>
+
+          <!-- Card 2: Webhook & Environment Switcher -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <div class="settings-card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 class="settings-card-title">n8n Automation Webhooks</h3>
+                <p class="settings-card-desc">Switch between Real (Production) and Test webhooks or configure custom
+                  endpoints.</p>
+              </div>
+            </div>
+
+            <form id="formWebhookSettings" novalidate>
+              <div class="settings-field-group">
+                <label class="settings-field-label">Environment Preset</label>
+                <div class="preset-btn-group">
+                  <button type="button" id="btnPresetProdWebhook" class="btn-preset active">
+                    <span class="status-indicator-dot"
+                      style="position:static; display:inline-block; margin-right:4px;"></span>
+                    Real (Production)
+                  </button>
+                  <button type="button" id="btnPresetTestWebhook" class="btn-preset">
+                    <span class="status-indicator-dot"
+                      style="position:static; display:inline-block; margin-right:4px; background:#f59e0b;"></span>
+                    Test Mode
+                  </button>
+                </div>
+              </div>
+
+              <div class="settings-field-group">
+                <label for="inputSettingsWebhookUrl" class="settings-field-label">DNA &amp; Auth Webhook URL</label>
+                <input type="url" id="inputSettingsWebhookUrl" class="form-input font-mono"
+                  value="http://localhost:5678/webhook/sign_both" placeholder="http://localhost:5678/webhook/sign_both"
+                  required>
+              </div>
+
+              <div class="settings-field-group">
+                <label class="settings-field-label">Notion Users Database ID</label>
+                <div class="settings-field-value font-mono">3dc6fd16-45b0-80ff-8435-c255ed191886</div>
+              </div>
+
+              <div class="settings-field-group">
+                <label class="settings-field-label">Notion DNA Database ID</label>
+                <div class="settings-field-value font-mono">3dc6fd16-45b0-8072-9e75-fb87ba35ed28</div>
+              </div>
+
+              <div class="settings-btn-row">
+                <button type="submit" id="btnSaveWebhookSettings" class="btn-primary">
+                  <span class="spinner" aria-hidden="true"></span>
+                  <span id="btnSaveWebhookText">Save Webhook URL</span>
+                </button>
+                <button type="button" id="btnTestWebhookPing" class="btn-secondary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                  <span>Test Ping</span>
+                </button>
+              </div>
+
+              <div id="webhookAlertBox" class="alert-box" role="alert" aria-live="polite"></div>
+            </form>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+
+</html>
