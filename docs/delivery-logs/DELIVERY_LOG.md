@@ -137,6 +137,30 @@
 |---|---|---|
 | `js/dashboard.js` | Code | Added existing page ID transmission on upload and latest record resolution on refresh |
 | `docs/delivery-logs/DELIVERY_LOG.md` | Delivery Log | Documented DNA record update and latest resolution fix |
+### RAILWAY-CORS-PROXY-FIX: Zero-CORS API Proxy and Cloud Integration
 
+- **Date**: 2026-09-16
+- **Status**: Completed
 
+#### Acceptance Criteria Met
 
+- [x] Implemented zero-CORS HTTP reverse proxy endpoint (`/api/webhook` and `/api/proxy`) in `server.js`.
+- [x] Forwarded requests server-to-server to n8n Cloud (`https://aboodjallab.app.n8n.cloud/webhook-test/sign_both` or custom target), bypassing browser CORS preflight restrictions completely.
+- [x] Handled browser OPTIONS preflight requests instantly with 204 No Content and permissive CORS headers.
+- [x] Updated `js/config.js`, `js/signin.js`, `js/signup.js`, and `js/dashboard.js` to route all auth and DNA operations via the same-origin proxy with `x-target-url` header support.
+- [x] Bumped script query string versions to `?v=4.0` across `index.html`, `signup.html`, and `dashboard.html` for instant cache invalidation.
+- [x] Maintained strict house style: zero em dashes across all code, comments, and documentation.
+
+#### Deliverables Table
+
+| File | Type | Description |
+|---|---|---|
+| `server.js` | Code | Added `/api/webhook` reverse proxy forwarding requests to n8n Cloud |
+| `js/config.js` | Code | Added `getEndpoint` and `getHeaders` helpers with seamless proxy routing |
+| `js/signin.js` | Code | Routed sign in requests via zero-CORS proxy endpoint |
+| `js/signup.js` | Code | Routed sign up requests via zero-CORS proxy endpoint |
+| `js/dashboard.js` | Code | Routed profile, DNA verification, and file upload requests via proxy |
+| `index.html` | Markup | Bumped script version query strings to `?v=4.0` |
+| `signup.html` | Markup | Bumped script version query strings to `?v=4.0` |
+| `dashboard.html` | Markup | Bumped script version query strings to `?v=4.0` |
+| `docs/delivery-logs/DELIVERY_LOG.md` | Delivery Log | Documented Railway zero-CORS proxy integration |

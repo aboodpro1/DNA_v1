@@ -1030,9 +1030,16 @@ async function refreshUserAndDnaValidation(authenticatedEmail) {
     return;
   }
 
-  const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.defaultUrl)
-    ? API_CONFIG.defaultUrl
-    : 'http://localhost:5678/webhook/sign_both';
+  const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getEndpoint)
+    ? API_CONFIG.getEndpoint()
+    : ((typeof API_CONFIG !== 'undefined' && API_CONFIG.defaultUrl) ? API_CONFIG.defaultUrl : '/api/webhook');
+
+  const reqHeaders = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getHeaders)
+    ? API_CONFIG.getHeaders()
+    : {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json, text/plain, */*'
+    };
 
   try {
     // ==================================================================
@@ -1046,10 +1053,7 @@ async function refreshUserAndDnaValidation(authenticatedEmail) {
 
     const userResponse = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/plain, */*'
-      },
+      headers: reqHeaders,
       body: JSON.stringify(userPayload)
     });
 
@@ -1145,10 +1149,7 @@ async function refreshUserAndDnaValidation(authenticatedEmail) {
 
     const dnaResponse = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/plain, */*'
-      },
+      headers: reqHeaders,
       body: JSON.stringify(dnaPayload)
     });
 
@@ -1328,6 +1329,17 @@ if (formProfileSettings) {
         realEmail = settingsEmailField.textContent;
       }
 
+      const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getEndpoint)
+        ? API_CONFIG.getEndpoint()
+        : ((typeof API_CONFIG !== 'undefined' && API_CONFIG.defaultUrl) ? API_CONFIG.defaultUrl : '/api/webhook');
+
+      const reqHeaders = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getHeaders)
+        ? API_CONFIG.getHeaders()
+        : {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json, text/plain, */*'
+        };
+
       const updatePayload = {
         action: 'update_user',
         email: realEmail,
@@ -1338,10 +1350,7 @@ if (formProfileSettings) {
 
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json, text/plain, */*'
-        },
+        headers: reqHeaders,
         body: JSON.stringify(updatePayload)
       });
 
@@ -1457,11 +1466,19 @@ if (btnTestWebhookPing) {
     btnTestWebhookPing.disabled = true;
     showWebhookAlert('Pinging n8n webhook endpoint...', 'info');
 
+    const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getEndpoint)
+      ? API_CONFIG.getEndpoint(targetUrl)
+      : targetUrl;
+
+    const reqHeaders = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getHeaders)
+      ? API_CONFIG.getHeaders(targetUrl)
+      : { 'Content-Type': 'application/json' };
+
     const startTime = performance.now();
     try {
-      const response = await fetch(targetUrl, {
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: reqHeaders,
         body: JSON.stringify({
           action: 'ping',
           timestamp: new Date().toISOString()
@@ -1647,12 +1664,20 @@ if (btnUploadDna) {
       const isUpdate = Boolean(existingPageId || window.AppState.hasDNA || sessionStorage.getItem('hasDNA') === 'true');
 
       // Large files (116+ KB) must be sent via HTTP POST body to avoid browser URL length limits
-      const fetchOptions = {
-        method: 'POST',
-        headers: {
+      const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getEndpoint)
+        ? API_CONFIG.getEndpoint()
+        : ((typeof API_CONFIG !== 'undefined' && API_CONFIG.defaultUrl) ? API_CONFIG.defaultUrl : '/api/webhook');
+
+      const reqHeaders = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getHeaders)
+        ? API_CONFIG.getHeaders()
+        : {
           'Content-Type': 'application/json',
           'Accept': 'application/json, text/plain, */*'
-        },
+        };
+
+      const fetchOptions = {
+        method: 'POST',
+        headers: reqHeaders,
         body: JSON.stringify({
           action: 'add_dna',
           sub_action: isUpdate ? 'update_dna' : 'add_dna',

@@ -1,16 +1,18 @@
 /**
  * Production Web Server for Railway Deployment
  *
- * Lightweight, zero-dependency Node.js HTTP server optimized for Railway.
- * Serves static assets, handles clean routing, sets security and no-cache headers,
- * and dynamically binds to Railway's assigned process.env.PORT.
+ * Lightweight, zero-dependency Node.js HTTP server with built-in API proxy.
+ * Serves static assets, handles clean routing, sets security headers,
+ * provides CORS-free proxying to n8n Cloud webhooks,
+ * and dynamically binds to Railway assigned process.env.PORT.
  *
- * Route:    All application routes
+ * Route:    All application routes and /api/webhook proxy
  * Trigger:  Railway start command: node server.js
- * Auth:     Static file delivery
+ * Auth:     Static file delivery and server-to-server n8n proxying
  */
 
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
@@ -19,6 +21,7 @@ const zlib = require('zlib');
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
 const BASE_DIR = __dirname;
+const DEFAULT_TARGET_WEBHOOK = process.env.N8N_WEBHOOK_URL || 'https://aboodjallab.app.n8n.cloud/webhook-test/sign_both';
 
 // MIME type dictionary
 const MIME_TYPES = {
@@ -39,17 +42,137 @@ const MIME_TYPES = {
   '.ttf': 'font/ttf'
 };
 
+/**
+ * Forward HTTP/HTTPS request to target n8n webhook server-to-server.
+ * Completely eliminates browser CORS preflight and loopback permission issues.
+ */
+function forwardToWebhook(targetUrlStr, method, incomingHeaders, bodyBuffer, clientRes) {
+  let parsedTarget;
+  try {
+    parsedTarget = new URL(targetUrlStr);
+  } catch (err) {
+    clientRes.writeHead(400, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*'
+    });
+    clientRes.end(JSON.stringify({
+      success: false,
+      approved: false,
+      message: 'Invalid target webhook URL: ' + err.message
+    }));
+    return;
+  }
+
+  const transport = parsedTarget.protocol === 'https:' ? https : http;
+  const isHttps = parsedTarget.protocol === 'https:';
+  const defaultPort = isHttps ? 443 : 80;
+
+  const outgoingHeaders = {
+    'Content-Type': incomingHeaders['content-type'] || 'application/json',
+    'Accept': incomingHeaders['accept'] || 'application/json, text/plain, */*',
+    'User-Agent': 'Railway-Node-Proxy/1.0',
+    'Content-Length': Buffer.byteLength(bodyBuffer)
+  };
+
+  const options = {
+    hostname: parsedTarget.hostname,
+    port: parsedTarget.port || defaultPort,
+    path: parsedTarget.pathname + parsedTarget.search,
+    method: method || 'POST',
+    headers: outgoingHeaders,
+    timeout: 30000
+  };
+
+  console.log(`[Proxy] Forwarding ${method} to ${targetUrlStr} (${bodyBuffer.length} bytes)`);
+
+  const proxyReq = transport.request(options, (proxyRes) => {
+    const resChunks = [];
+    proxyRes.on('data', (chunk) => resChunks.push(chunk));
+    proxyRes.on('end', () => {
+      const responseData = Buffer.concat(resChunks);
+      const resContentType = proxyRes.headers['content-type'] || 'application/json; charset=utf-8';
+
+      clientRes.writeHead(proxyRes.statusCode || 200, {
+        'Content-Type': resContentType,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-target-url, Accept',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      });
+      clientRes.end(responseData);
+      console.log(`[Proxy Response] ${proxyRes.statusCode} from ${targetUrlStr}`);
+    });
+  });
+
+  proxyReq.on('error', (err) => {
+    console.error(`[Proxy Error] Failed connecting to ${targetUrlStr}:`, err.message);
+    clientRes.writeHead(502, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*'
+    });
+    clientRes.end(JSON.stringify({
+      success: false,
+      approved: false,
+      message: 'Proxy error reaching n8n webhook: ' + err.message,
+      error: err.message
+    }));
+  });
+
+  proxyReq.on('timeout', () => {
+    proxyReq.destroy();
+    clientRes.writeHead(504, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*'
+    });
+    clientRes.end(JSON.stringify({
+      success: false,
+      approved: false,
+      message: 'Proxy timed out waiting for n8n response (30s limit)'
+    }));
+  });
+
+  if (bodyBuffer && bodyBuffer.length > 0) {
+    proxyReq.write(bodyBuffer);
+  }
+  proxyReq.end();
+}
+
 const server = http.createServer((req, res) => {
-  // CORS & Security Headers
+  // Global CORS & Security Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-target-url, Accept');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
 
+  // Handle preflight OPTIONS requests immediately
   if (req.method === 'OPTIONS') {
-    res.writeHead(204);
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-target-url, Accept',
+      'Access-Control-Max-Age': '86400'
+    });
     res.end();
+    return;
+  }
+
+  // Parse and normalize path
+  const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  let pathname = decodeURIComponent(parsedUrl.pathname);
+
+  // Handle API Proxy endpoint (/api/webhook or /api/proxy)
+  if (pathname.startsWith('/api/webhook') || pathname.startsWith('/api/proxy')) {
+    const targetQuery = parsedUrl.searchParams.get('url') || parsedUrl.searchParams.get('target');
+    const targetHeader = req.headers['x-target-url'];
+    const targetWebhookUrl = (targetHeader || targetQuery || DEFAULT_TARGET_WEBHOOK).trim();
+
+    const bodyChunks = [];
+    req.on('data', (chunk) => bodyChunks.push(chunk));
+    req.on('end', () => {
+      const requestBody = Buffer.concat(bodyChunks);
+      forwardToWebhook(targetWebhookUrl, req.method, req.headers, requestBody, res);
+    });
     return;
   }
 
@@ -58,10 +181,6 @@ const server = http.createServer((req, res) => {
     res.end('Method Not Allowed');
     return;
   }
-
-  // Parse and normalize path
-  const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  let pathname = decodeURIComponent(parsedUrl.pathname);
 
   // Default root to index.html
   if (pathname === '/' || pathname === '') {
@@ -132,4 +251,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`[Railway Server] Running on http://${HOST}:${PORT}`);
+  console.log(`[Railway Server] Default webhook proxy target: ${DEFAULT_TARGET_WEBHOOK}`);
 });

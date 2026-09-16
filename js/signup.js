@@ -109,16 +109,20 @@ async function handleSignUp(e) {
   setLoading(true);
 
   try {
-    const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.defaultUrl)
-      ? API_CONFIG.defaultUrl
-      : ((typeof API_CONFIG !== 'undefined' && API_CONFIG.signUp) ? API_CONFIG.signUp : 'https://aboodjallab.app.n8n.cloud/webhook-test/sign_both');
+    const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getEndpoint)
+      ? API_CONFIG.getEndpoint()
+      : ((typeof API_CONFIG !== 'undefined' && API_CONFIG.defaultUrl) ? API_CONFIG.defaultUrl : '/api/webhook');
+
+    const reqHeaders = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getHeaders)
+      ? API_CONFIG.getHeaders()
+      : {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/plain, */*'
+      };
 
     const fetchOptions = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/plain, */*'
-      },
+      headers: reqHeaders,
       body: JSON.stringify({
         action: 'signup',
         email: email,
