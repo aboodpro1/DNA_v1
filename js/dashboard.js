@@ -1412,7 +1412,7 @@ function updatePresetButtons(url) {
 
 if (btnPresetProdWebhook) {
   btnPresetProdWebhook.addEventListener('click', () => {
-    const prodUrl = 'http://localhost:5678/webhook/sign_both';
+    const prodUrl = 'https://aboodjallab.app.n8n.cloud/webhook/sign_both';
     if (inputSettingsWebhookUrl) inputSettingsWebhookUrl.value = prodUrl;
     updatePresetButtons(prodUrl);
   });
@@ -1420,7 +1420,7 @@ if (btnPresetProdWebhook) {
 
 if (btnPresetTestWebhook) {
   btnPresetTestWebhook.addEventListener('click', () => {
-    const testUrl = 'http://localhost:5678/webhook-test/sign_both';
+    const testUrl = 'https://aboodjallab.app.n8n.cloud/webhook-test/sign_both';
     if (inputSettingsWebhookUrl) inputSettingsWebhookUrl.value = testUrl;
     updatePresetButtons(testUrl);
   });
@@ -1452,7 +1452,7 @@ if (formWebhookSettings) {
 if (btnTestWebhookPing) {
   btnTestWebhookPing.addEventListener('click', async () => {
     clearWebhookAlert();
-    const targetUrl = inputSettingsWebhookUrl ? inputSettingsWebhookUrl.value.trim() : 'http://localhost:5678/webhook/sign_both';
+    const targetUrl = inputSettingsWebhookUrl ? inputSettingsWebhookUrl.value.trim() : 'https://aboodjallab.app.n8n.cloud/webhook-test/sign_both';
 
     btnTestWebhookPing.disabled = true;
     showWebhookAlert('Pinging n8n webhook endpoint...', 'info');

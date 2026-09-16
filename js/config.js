@@ -9,15 +9,18 @@
  * Auth:     n8n Webhook Endpoints
  */
 
-// Retrieve any custom or saved webhook endpoint from storage, defaulting to real production
+// Retrieve any custom or saved webhook endpoint from storage, defaulting to n8n cloud
 const savedWebhookUrl = typeof localStorage !== 'undefined' ? localStorage.getItem('custom_webhook_url') : null;
-const DEFAULT_WEBHOOK_URL = savedWebhookUrl || "http://localhost:5678/webhook/sign_both";
+const N8N_CLOUD_TEST_URL = "https://aboodjallab.app.n8n.cloud/webhook-test/sign_both";
+const N8N_CLOUD_PROD_URL = "https://aboodjallab.app.n8n.cloud/webhook/sign_both";
+const DEFAULT_WEBHOOK_URL = savedWebhookUrl || N8N_CLOUD_TEST_URL;
 
 const API_CONFIG = {
   // Base endpoints
   defaultUrl: DEFAULT_WEBHOOK_URL,
-  productionUrl: "http://localhost:5678/webhook/sign_both",
-  testUrl: "http://localhost:5678/webhook-test/sign_both",
+  productionUrl: N8N_CLOUD_PROD_URL,
+  testUrl: N8N_CLOUD_TEST_URL,
+  localUrl: "http://localhost:5678/webhook/sign_both",
 
   // Authentication endpoints
   auth: {
