@@ -10,6 +10,7 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,44 +18,31 @@
   <meta name="description" content="Sign in to your account.">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="auth-body">
 
   <main class="auth-container">
     <div class="auth-card">
-      
+
       <header class="auth-header">
         <h1>Sign In</h1>
         <p>Enter your credentials to access your account</p>
       </header>
 
       <form id="signInForm" novalidate>
-        
+
         <!-- Email Field -->
         <div class="form-group">
           <label for="email" class="form-label">Email Address</label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            class="form-input" 
-            placeholder="user@example.com" 
-            required
-            autocomplete="email"
-          >
+          <input type="email" id="email" name="email" class="form-input" placeholder="user@example.com" required
+            autocomplete="email">
         </div>
 
         <!-- Password Field -->
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            class="form-input font-mono" 
-            placeholder="••••••••••••" 
-            required
-            autocomplete="current-password"
-          >
+          <input type="password" id="password" name="password" class="form-input font-mono" placeholder="••••••••••••"
+            required autocomplete="current-password">
         </div>
 
         <!-- Submit Button -->
@@ -80,7 +68,8 @@
     </footer>
   </main>
 
-  <script src="js/config.js?v=2.1"></script>
-  <script src="js/signin.js?v=2.1"></script>
+  <script src="js/config.js"></script>
+  <script src="js/signin.js"></script>
 </body>
+
 </html>
