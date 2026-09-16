@@ -1030,17 +1030,6 @@ async function refreshUserAndDnaValidation(authenticatedEmail) {
     return;
   }
 
-  const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getEndpoint)
-    ? API_CONFIG.getEndpoint()
-    : ((typeof API_CONFIG !== 'undefined' && API_CONFIG.defaultUrl) ? API_CONFIG.defaultUrl : '/api/webhook');
-
-  const reqHeaders = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getHeaders)
-    ? API_CONFIG.getHeaders()
-    : {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json, text/plain, */*'
-    };
-
   try {
     // ==================================================================
     // STEP 1: CHECK USER EXISTS & ACCESS/APPROVED STATUS IN USERS DB
@@ -1051,11 +1040,19 @@ async function refreshUserAndDnaValidation(authenticatedEmail) {
       timestamp: new Date().toISOString()
     };
 
-    const userResponse = await fetch(endpoint, {
-      method: 'POST',
-      headers: reqHeaders,
-      body: JSON.stringify(userPayload)
-    });
+    let userReqUrl = '/api/webhook';
+    let userReqOptions = { method: 'GET', headers: { 'Accept': 'application/json, text/plain, */*' } };
+
+    if (typeof API_CONFIG !== 'undefined' && API_CONFIG.buildRequest) {
+      const built = API_CONFIG.buildRequest(userPayload, null, 'GET');
+      userReqUrl = built.url;
+      userReqOptions = built.options;
+    } else {
+      const params = new URLSearchParams(userPayload);
+      userReqUrl = `/api/webhook?${params.toString()}`;
+    }
+
+    const userResponse = await fetch(userReqUrl, userReqOptions);
 
     let userData;
     const userContentType = userResponse.headers.get('content-type');
@@ -1147,11 +1144,19 @@ async function refreshUserAndDnaValidation(authenticatedEmail) {
       timestamp: new Date().toISOString()
     };
 
-    const dnaResponse = await fetch(endpoint, {
-      method: 'POST',
-      headers: reqHeaders,
-      body: JSON.stringify(dnaPayload)
-    });
+    let dnaReqUrl = '/api/webhook';
+    let dnaReqOptions = { method: 'GET', headers: { 'Accept': 'application/json, text/plain, */*' } };
+
+    if (typeof API_CONFIG !== 'undefined' && API_CONFIG.buildRequest) {
+      const built = API_CONFIG.buildRequest(dnaPayload, null, 'GET');
+      dnaReqUrl = built.url;
+      dnaReqOptions = built.options;
+    } else {
+      const params = new URLSearchParams(dnaPayload);
+      dnaReqUrl = `/api/webhook?${params.toString()}`;
+    }
+
+    const dnaResponse = await fetch(dnaReqUrl, dnaReqOptions);
 
     let dnaData;
     const dnaContentType = dnaResponse.headers.get('content-type');

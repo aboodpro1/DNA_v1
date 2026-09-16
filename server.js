@@ -46,7 +46,7 @@ const MIME_TYPES = {
  * Forward HTTP/HTTPS request to target n8n webhook server-to-server.
  * Completely eliminates browser CORS preflight and loopback permission issues.
  */
-function forwardToWebhook(targetUrlStr, method, incomingHeaders, bodyBuffer, clientRes) {
+function forwardToWebhook(targetUrlStr, method, incomingHeaders, bodyBuffer, forwardParams, clientRes) {
   let parsedTarget;
   try {
     parsedTarget = new URL(targetUrlStr);
@@ -63,27 +63,38 @@ function forwardToWebhook(targetUrlStr, method, incomingHeaders, bodyBuffer, cli
     return;
   }
 
+  // Merge incoming query parameters into target URL for GET / query requests
+  if (forwardParams) {
+    forwardParams.forEach((value, key) => {
+      parsedTarget.searchParams.set(key, value);
+    });
+  }
+
   const transport = parsedTarget.protocol === 'https:' ? https : http;
   const isHttps = parsedTarget.protocol === 'https:';
   const defaultPort = isHttps ? 443 : 80;
 
   const outgoingHeaders = {
-    'Content-Type': incomingHeaders['content-type'] || 'application/json',
     'Accept': incomingHeaders['accept'] || 'application/json, text/plain, */*',
-    'User-Agent': 'Railway-Node-Proxy/1.0',
-    'Content-Length': Buffer.byteLength(bodyBuffer)
+    'User-Agent': 'Railway-Node-Proxy/1.0'
   };
+
+  const isPostOrPut = method === 'POST' || method === 'PUT' || method === 'PATCH';
+  if (isPostOrPut && bodyBuffer && bodyBuffer.length > 0) {
+    outgoingHeaders['Content-Type'] = incomingHeaders['content-type'] || 'application/json';
+    outgoingHeaders['Content-Length'] = Buffer.byteLength(bodyBuffer);
+  }
 
   const options = {
     hostname: parsedTarget.hostname,
     port: parsedTarget.port || defaultPort,
     path: parsedTarget.pathname + parsedTarget.search,
-    method: method || 'POST',
+    method: method || 'GET',
     headers: outgoingHeaders,
     timeout: 30000
   };
 
-  console.log(`[Proxy] Forwarding ${method} to ${targetUrlStr} (${bodyBuffer.length} bytes)`);
+  console.log(`[Proxy] Forwarding ${method} to ${parsedTarget.toString()} (${bodyBuffer ? bodyBuffer.length : 0} body bytes)`);
 
   const proxyReq = transport.request(options, (proxyRes) => {
     const resChunks = [];
@@ -95,17 +106,17 @@ function forwardToWebhook(targetUrlStr, method, incomingHeaders, bodyBuffer, cli
       clientRes.writeHead(proxyRes.statusCode || 200, {
         'Content-Type': resContentType,
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-target-url, Accept',
         'Cache-Control': 'no-cache, no-store, must-revalidate'
       });
       clientRes.end(responseData);
-      console.log(`[Proxy Response] ${proxyRes.statusCode} from ${targetUrlStr}`);
+      console.log(`[Proxy Response] ${proxyRes.statusCode} from ${parsedTarget.toString()}`);
     });
   });
 
   proxyReq.on('error', (err) => {
-    console.error(`[Proxy Error] Failed connecting to ${targetUrlStr}:`, err.message);
+    console.error(`[Proxy Error] Failed connecting to ${parsedTarget.toString()}:`, err.message);
     clientRes.writeHead(502, {
       'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*'
@@ -131,7 +142,7 @@ function forwardToWebhook(targetUrlStr, method, incomingHeaders, bodyBuffer, cli
     }));
   });
 
-  if (bodyBuffer && bodyBuffer.length > 0) {
+  if (isPostOrPut && bodyBuffer && bodyBuffer.length > 0) {
     proxyReq.write(bodyBuffer);
   }
   proxyReq.end();
@@ -167,11 +178,19 @@ const server = http.createServer((req, res) => {
     const targetHeader = req.headers['x-target-url'];
     const targetWebhookUrl = (targetHeader || targetQuery || DEFAULT_TARGET_WEBHOOK).trim();
 
+    // Collect query params to forward
+    const forwardParams = new URLSearchParams();
+    parsedUrl.searchParams.forEach((val, key) => {
+      if (key !== 'url' && key !== 'target') {
+        forwardParams.append(key, val);
+      }
+    });
+
     const bodyChunks = [];
     req.on('data', (chunk) => bodyChunks.push(chunk));
     req.on('end', () => {
       const requestBody = Buffer.concat(bodyChunks);
-      forwardToWebhook(targetWebhookUrl, req.method, req.headers, requestBody, res);
+      forwardToWebhook(targetWebhookUrl, req.method, req.headers, requestBody, forwardParams, res);
     });
     return;
   }

@@ -2,8 +2,8 @@
  * API & Webhook Configuration
  *
  * Centralized configuration for n8n authentication and DNA webhooks.
- * Uses the built-in zero-CORS /api/webhook proxy when hosted on web servers,
- * and passes the active n8n target webhook seamlessly.
+ * Supports both GET (query parameters) and POST (JSON body) workflows.
+ * Routes through the built-in zero-CORS /api/webhook proxy when hosted.
  *
  * Route:    All application routes
  * Trigger:  Loaded on application startup
@@ -34,7 +34,9 @@ const isWebOrigin = typeof window !== 'undefined' && (window.location.protocol =
 const DEFAULT_ENDPOINT = isWebOrigin ? '/api/webhook' : initialTargetWebhook;
 
 const API_CONFIG = {
-  method: "POST",
+  // Method configured to GET as requested
+  method: "GET",
+
   // Active target n8n cloud webhook
   targetWebhookUrl: initialTargetWebhook,
   productionUrl: N8N_PRODUCTION_URL,
@@ -56,22 +58,57 @@ const API_CONFIG = {
   getHeaders: function (customUrl) {
     const target = (customUrl || this.targetWebhookUrl || N8N_CLOUD_URL).trim();
     return {
-      'Content-Type': 'application/json',
       'Accept': 'application/json, text/plain, */*',
       'x-target-url': target
     };
   },
 
+  // Helper to construct request url and options for either GET or POST
+  buildRequest: function (payload, customUrl, customMethod) {
+    const method = customMethod || this.method || "GET";
+    const baseEndpoint = this.getEndpoint(customUrl);
+    const headers = this.getHeaders(customUrl);
+
+    if (method.toUpperCase() === "GET") {
+      const urlObj = new URL(baseEndpoint, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+      if (payload && typeof payload === 'object') {
+        Object.keys(payload).forEach(k => {
+          if (payload[k] !== undefined && payload[k] !== null) {
+            urlObj.searchParams.set(k, String(payload[k]));
+          }
+        });
+      }
+      const finalUrl = isWebOrigin ? (urlObj.pathname + urlObj.search) : urlObj.toString();
+      return {
+        url: finalUrl,
+        options: {
+          method: 'GET',
+          headers: headers
+        }
+      };
+    } else {
+      headers['Content-Type'] = 'application/json';
+      return {
+        url: baseEndpoint,
+        options: {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(payload || {})
+        }
+      };
+    }
+  },
+
   // Authentication endpoints
   auth: {
-    method: "POST",
+    method: "GET",
     signIn: DEFAULT_ENDPOINT,
     signUp: DEFAULT_ENDPOINT
   },
 
   // DNA management endpoints
   dna: {
-    method: "POST",
+    method: "GET",
     add: DEFAULT_ENDPOINT
   },
 

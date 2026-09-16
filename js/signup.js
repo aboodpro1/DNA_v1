@@ -108,30 +108,26 @@ async function handleSignUp(e) {
   // Set loading state and wait for real n8n response
   setLoading(true);
 
-  try {
-    const endpoint = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getEndpoint)
-      ? API_CONFIG.getEndpoint()
-      : ((typeof API_CONFIG !== 'undefined' && API_CONFIG.defaultUrl) ? API_CONFIG.defaultUrl : '/api/webhook');
-
-    const reqHeaders = (typeof API_CONFIG !== 'undefined' && API_CONFIG.getHeaders)
-      ? API_CONFIG.getHeaders()
-      : {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/plain, */*'
-      };
-
-    const fetchOptions = {
-      method: 'POST',
-      headers: reqHeaders,
-      body: JSON.stringify({
-        action: 'signup',
-        email: email,
-        password: password,
-        timestamp: new Date().toISOString()
-      })
+    const signupPayload = {
+      action: 'signup',
+      email: email,
+      password: password,
+      timestamp: new Date().toISOString()
     };
 
-    const response = await fetch(endpoint, fetchOptions);
+    let requestUrl = '/api/webhook';
+    let fetchOptions = { method: 'GET', headers: { 'Accept': 'application/json, text/plain, */*' } };
+
+    if (typeof API_CONFIG !== 'undefined' && API_CONFIG.buildRequest) {
+      const built = API_CONFIG.buildRequest(signupPayload, null, 'GET');
+      requestUrl = built.url;
+      fetchOptions = built.options;
+    } else {
+      const params = new URLSearchParams(signupPayload);
+      requestUrl = `/api/webhook?${params.toString()}`;
+    }
+
+    const response = await fetch(requestUrl, fetchOptions);
 
     let data;
     const contentType = response.headers.get('content-type');
